@@ -15,7 +15,7 @@ public class UserConstants {
     public static final String INVALID_CREDENTIALS = "Invalid credentials";
 
     // JWT & Authentication messages
-    public static final String TOKEN_INVALID = "Invalid authentication token";
+    public static final String TOKEN_INVALID = "Invalid JWT Token: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.";
     public static final String TOKEN_EXPIRED = "Token Expired";
     public static final String UNAUTHORIZED_ACCESS = "You are not authorized to access this resource";
     public static final String TOKEN_MISSING_INVALID="Token Missing or Invalid";

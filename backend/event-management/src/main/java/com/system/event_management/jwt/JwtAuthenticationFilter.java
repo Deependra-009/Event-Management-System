@@ -2,8 +2,7 @@ package com.system.event_management.jwt;
 
 
 import com.system.event_management.core.UserConstants;
-import com.system.event_management.exception.JwtAuthenticationException;
-import com.system.event_management.exception.UserException;
+import com.system.event_management.exception.*;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
@@ -35,49 +34,45 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
+        String authorizationHeader = request.getHeader("Authorization");
+        String username = null;
+        String jwt = null;
 
         try {
-            String authorizationHeader = request.getHeader("Authorization");
-            String username = null;
-            String jwt = null;
-
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 jwt = authorizationHeader.substring(7);
-                if (!jwt.isEmpty()) {
-                    username = this.jwtHelper.getUsernameFromToken(jwt);
-                } else {
-                    throw new JwtAuthenticationException(UserConstants.TOKEN_INVALID, HttpStatus.FORBIDDEN);
-                }
+                username = jwtHelper.getUsernameFromToken(jwt);
             }
 
             if (username != null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                log.info("Username : jwt : "+(userDetails.getUsername()) + " : "+ jwt);
                 if (jwtHelper.validateToken(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    System.out.println(auth);
                     auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             }
+
         } catch (ExpiredJwtException e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, UserConstants.TOKEN_INVALID);
-            return;
-        } catch (MalformedJwtException e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, UserConstants.TOKEN_EXPIRED);
+            request.setAttribute("exception", UserConstants.TOKEN_EXPIRED);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         } catch (IllegalArgumentException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, UserConstants.TOKEN_MISSING_INVALID);
+            request.setAttribute("exception", UserConstants.TOKEN_MISSING_INVALID);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
+            request.setAttribute("exception", UserConstants.TOKEN_INVALID);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
         filterChain.doFilter(request, response);
     }
+
 }
 
