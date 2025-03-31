@@ -29,7 +29,7 @@ public class CustomUserServiceImpl implements UserDetailsService {
 
         UserEntity userEntity=this.userRepository.findByUsername(username);
 
-        log.info("userEntity : {} : {}", username, userEntity);
+        log.info("username : {}", username);
 
         if(userEntity==null){
             throw new UsernameNotFoundException("User Not Available");
