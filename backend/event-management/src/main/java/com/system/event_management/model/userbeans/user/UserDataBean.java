@@ -2,6 +2,8 @@ package com.system.event_management.model.userbeans.user;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -12,7 +14,7 @@ public class UserDataBean {
     private Long userID;
     private String fullName;
     private String username;
-    private String password;
+    private List<String> roles;
 
 
 }

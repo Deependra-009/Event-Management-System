@@ -1,6 +1,9 @@
 package com.system.event_management.controller;
 
 import com.system.event_management.exception.UserException;
+import com.system.event_management.model.userbeans.login.LoginRequestBean;
+import com.system.event_management.model.userbeans.login.LoginResponseBean;
+import com.system.event_management.model.userbeans.user.UserDataBean;
 import com.system.event_management.model.userbeans.user.UserRequestBean;
 import com.system.event_management.model.userbeans.user.UserResponseBean;
 import com.system.event_management.service.UserService;
@@ -14,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -33,5 +38,10 @@ public class UserController {
     })
     public ResponseEntity<UserResponseBean<?>> createUser(@RequestBody UserRequestBean userRequestBean) throws UserException {
         return new ResponseEntity<>(this.userService.createUser(userRequestBean), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseBean<?>> login(@RequestBody LoginRequestBean loginRequestBean) throws UserException {
+        return new ResponseEntity<>(this.userService.loginUser(loginRequestBean), HttpStatus.CREATED);
     }
 }

@@ -25,8 +25,15 @@ repositories {
 
 dependencies {
 
+	// JWT & Springsecurity
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5' // Optional for JWT
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'mysql:mysql-connector-java:8.0.33'
+
 	implementation 'org.hibernate.orm:hibernate-community-dialects:6.4.0.Final'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
