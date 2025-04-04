@@ -38,7 +38,7 @@ public class CustomUserServiceImpl implements UserDetailsService {
         // Convert List<RolesEntity> to List<String>
         List<SimpleGrantedAuthority> authorities = userEntity.getRoles()
                 .stream()
-                .map(role -> new SimpleGrantedAuthority(role.getRole())) // Extract role name
+                .map(role -> new SimpleGrantedAuthority("ROLE_"+role.getRole())) // Extract role name
                 .collect(Collectors.toList());
 
 
