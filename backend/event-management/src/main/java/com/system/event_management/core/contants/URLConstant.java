@@ -1,4 +1,4 @@
-package com.system.event_management.core;
+package com.system.event_management.core.contants;
 
 
 public class URLConstant {

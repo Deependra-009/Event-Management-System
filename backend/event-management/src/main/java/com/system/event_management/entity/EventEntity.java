@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class EventEntity {
     private String eventLocation;
 
     @NotNull(message = "Date and time are required")
-    private LocalDateTime eventDateTime;
+    private Timestamp eventDateTime;
 
     @OneToMany(mappedBy = "eventEntity",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 //    @JsonIgnore

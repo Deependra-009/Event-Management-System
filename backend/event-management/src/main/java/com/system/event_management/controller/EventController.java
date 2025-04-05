@@ -1,6 +1,6 @@
 package com.system.event_management.controller;
 
-import com.system.event_management.core.EventConstants;
+import com.system.event_management.core.messages.EventMessages;
 import com.system.event_management.exception.EventNotFoundException;
 import com.system.event_management.exception.InvalidEventIDException;
 import com.system.event_management.exception.UserException;
@@ -70,7 +70,7 @@ public class EventController {
         try {
             return new ResponseEntity<>(eventManagementService.updateEvent(eventRequestBean, Long.parseLong(id)), HttpStatus.OK);
         } catch (NumberFormatException e) {
-            throw new InvalidEventIDException(EventConstants.EVENT_ID_INVALID);
+            throw new InvalidEventIDException(EventMessages.EVENT_ID_INVALID);
         }
     }
 
@@ -86,7 +86,7 @@ public class EventController {
         try {
             return new ResponseEntity<>(eventManagementService.deleteEvent(Long.parseLong(id)), HttpStatus.OK);
         } catch (NumberFormatException e) {
-            throw new InvalidEventIDException(EventConstants.EVENT_ID_INVALID);
+            throw new InvalidEventIDException(EventMessages.EVENT_ID_INVALID);
         }
     }
 

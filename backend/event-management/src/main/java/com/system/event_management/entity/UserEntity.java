@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table
@@ -26,9 +27,9 @@ public class UserEntity{
     private String password;
 
     @OneToMany(mappedBy = "userEntity",fetch = FetchType.EAGER,cascade = CascadeType.ALL)
-    private List<RolesEntity> roles;
+    private Set<RolesEntity> roles;
 
     @OneToMany(mappedBy = "userEntity",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<RSVPEntity> rsvps;
+    private Set<RSVPEntity> rsvps;
 
 }

@@ -1,6 +1,6 @@
-package com.system.event_management.core;
+package com.system.event_management.core.messages;
 
-public class UserConstants {
+public class UserMessages {
 
     // Success Messages
     public static final String USER_REGISTER_SUCCESS = "User registered successfully";

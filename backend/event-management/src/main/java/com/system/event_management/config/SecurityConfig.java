@@ -1,6 +1,6 @@
 package com.system.event_management.config;
 
-import com.system.event_management.core.URLConstant;
+import com.system.event_management.core.contants.URLConstant;
 import com.system.event_management.jwt.CustomAccessDeniedHandler;
 import com.system.event_management.jwt.JwtAuthenticationEntryPoint;
 import com.system.event_management.jwt.JwtAuthenticationFilter;
@@ -11,15 +11,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import java.net.URL;
 
 @Configuration
 public class SecurityConfig{

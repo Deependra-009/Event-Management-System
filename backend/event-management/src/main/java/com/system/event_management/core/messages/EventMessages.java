@@ -1,6 +1,6 @@
-package com.system.event_management.core;
+package com.system.event_management.core.messages;
 
-public class EventConstants {
+public class EventMessages {
 
     public static final String EVENT_DELETE_SUCCESS = "Event deleted successfully";
     public static final String EVENT_NOT_FOUND = "Event with ID %d not found";

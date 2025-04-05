@@ -1,17 +1,14 @@
 package com.system.event_management.jwt;
 
 
-import com.system.event_management.core.UserConstants;
-import com.system.event_management.exception.*;
+import com.system.event_management.core.messages.UserMessages;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.security.SignatureException;
 
 @Component
 @Slf4j
@@ -58,15 +54,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
         } catch (ExpiredJwtException e) {
-            request.setAttribute("exception", UserConstants.TOKEN_EXPIRED);
+            request.setAttribute("exception", UserMessages.TOKEN_EXPIRED);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         } catch (IllegalArgumentException e) {
-            request.setAttribute("exception", UserConstants.TOKEN_MISSING_INVALID);
+            request.setAttribute("exception", UserMessages.TOKEN_MISSING_INVALID);
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         } catch (Exception e) {
-            request.setAttribute("exception", UserConstants.TOKEN_INVALID);
+            request.setAttribute("exception", UserMessages.TOKEN_INVALID);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
