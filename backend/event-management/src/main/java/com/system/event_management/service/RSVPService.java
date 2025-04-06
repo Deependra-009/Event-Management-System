@@ -9,4 +9,5 @@ public interface RSVPService {
 
     public RSVPResponseBean<?> registerRSVP(Long eventId, RSVPRequestBean rsvpRequestBean) throws UserException, EventNotFoundException;
 
+    public RSVPResponseBean<?> updateRSVP(Long eventID,RSVPRequestBean rsvpRequestBean) throws UserException;
 }

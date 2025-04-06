@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseBean<?> createUser(UserRequestBean userRequestBean) throws UserException {
 
-//        this.redisService.deleteValue(RedisEnums.GET_ALL_USERS.name());
+        this.redisService.deleteValue(RedisEnums.GET_ALL_USERS.name());
 
         userRequestBean.setPassword(passwordEncoder.encode(userRequestBean.getPassword()));
 
@@ -107,9 +107,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LoginResponseBean<?> loginUser(LoginRequestBean loginRequestBean) throws UserException {
-
         log.info("Username : "+ loginRequestBean.getPassword());
-
         try{
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequestBean.getUsername(), loginRequestBean.getPassword()));
@@ -130,17 +128,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDataBean> getAllUser() {
-
         List<UserDataBean> cacheData=this.redisService.getValue(RedisEnums.GET_ALL_USERS.name(), new TypeReference<List<UserDataBean>>(){});
-
         if(cacheData!=null){
             return cacheData;
         }
         else{
             List<UserEntity> userEntityList = this.userRepository.fetchUserWithRolesAndRsvps();
-
             List<UserDataBean> userDataBeans = Mapper.mappedAllUsersDataIntoBean(userEntityList);
-//            this.redisService.setValue(RedisEnums.GET_ALL_USERS.name(), userDataBeans,600);
+            this.redisService.setValue(RedisEnums.GET_ALL_USERS.name(), userDataBeans,600);
             return userDataBeans;
         }
     }

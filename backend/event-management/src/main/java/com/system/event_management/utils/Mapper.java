@@ -8,6 +8,7 @@ import com.system.event_management.model.rsvpbeans.RSVPData;
 import com.system.event_management.model.userbeans.user.UserDataBean;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -16,26 +17,31 @@ import java.util.stream.Collectors;
 
 public class Mapper {
 
-    public static List<EventDataBean> mappedAllEventsDataIntoBean(List<EventEntity> eventEntityList) {
+    public static List<EventDataBean> mappedAllEventsDataIntoBean(List<EventEntity> eventEntityList,String getByParticularUser) {
         return eventEntityList.stream()
                 .map(event -> {
                     EventDataBean eventDataBean = new EventDataBean();
                     BeanUtils.copyProperties(event, eventDataBean);
 
-                    eventDataBean.setCreatedBy(
-                            UserDataBean.builder()
-                                    .username(event.getUserEntity().getUsername())
-                                    .build()
-                    );
+                    if(!getByParticularUser.equals("USER")){
+
+                        eventDataBean.setCreatedBy(
+                                UserDataBean.builder()
+                                        .username(event.getUserEntity().getUsername())
+                                        .build()
+                        );
+                    }
 
                     List<RSVPData> usersList = event.getRsvps().stream()
                             .map(user -> RSVPData.builder()
-                                    .userID(user.getUserEntity().getUserID())
+                                    .username(user.getUserEntity().getUsername())
                                     .attending(user.isAttending())
                                     .build())
                             .collect(Collectors.toList());
 
-                    eventDataBean.setUsers(usersList);
+                    eventDataBean.setUsers(
+                            usersList.isEmpty() || (getByParticularUser.equals("PUBLIC"))
+                                    ?null:usersList);
 
                     return eventDataBean;
                 })

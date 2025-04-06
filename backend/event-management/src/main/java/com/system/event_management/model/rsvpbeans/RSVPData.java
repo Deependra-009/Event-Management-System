@@ -11,6 +11,6 @@ import lombok.*;
 //@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RSVPData {
 
-    private Long userID;
+    private String username;
     private boolean attending;
 }

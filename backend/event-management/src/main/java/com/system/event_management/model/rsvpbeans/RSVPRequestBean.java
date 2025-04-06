@@ -12,7 +12,5 @@ import lombok.Setter;
 @NoArgsConstructor
 //@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RSVPRequestBean {
-
-    private Long userID;
     private boolean attending;
 }

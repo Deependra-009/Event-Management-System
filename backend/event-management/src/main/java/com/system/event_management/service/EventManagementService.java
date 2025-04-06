@@ -7,7 +7,7 @@ import com.system.event_management.model.eventbeans.EventResponseBean;
 
 public interface EventManagementService {
 
-    public EventResponseBean<?> getAllEvents(int page, int limit);
+    public EventResponseBean<?> getAllEvents(int page, int limit,String type);
 
     public EventResponseBean<?> createEvent(EventRequestBean eventRequestBean);
 
@@ -15,4 +15,5 @@ public interface EventManagementService {
 
     public EventResponseBean<?> deleteEvent(Long id) throws EventNotFoundException;
 
+    public EventResponseBean<?> getAllEventsOfParticularUser();
 }

@@ -28,105 +28,107 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
-@Slf4j
 @Service
+@Slf4j
 public class EventManagementServiceImpl implements EventManagementService {
 
-    @Autowired
-    private RedisService redisService;
+    @Autowired private RedisService redisService;
+    @Autowired private UserService userService;
+    @Autowired private EventRepository eventRepository;
 
-    @Autowired
-    private UserService userService;
+    private String getLoggedInUsername() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
 
-    @Autowired
-    private EventRepository eventRepository;
-
-    @Override
-    public EventResponseBean<?> getAllEvents(int page, int limit) {
-
-        List<EventEntity> cacheData = redisService.getValue(RedisEnums.GET_ALL_EVENTS.name(), new TypeReference<List<EventEntity>>() {});
-
-
-        if(cacheData!=null){
-            return EventResponseBean.builder()
-                    .status(true)
-                    .data(cacheData)
-                    .build();
-        }
-        else{
-            Page<EventEntity> eventPage = eventRepository.findAll(PageRequest.of(page, limit));
-
-            EventResponseBean<?> eventResponseBean=EventResponseBean.builder()
-                    .status(true)
-                    .data(Mapper.mappedAllEventsDataIntoBean(eventPage.getContent()))
-                    .build();
-
-//            this.redisService.setValue(RedisEnums.GET_ALL_EVENTS.name(),eventResponseBean.getData(),600);
-            return eventResponseBean;
-        }
+    private Long getCurrentUserId() {
+        return userService.getUserData(); // Assuming it returns userId
     }
 
     @Override
-    public EventResponseBean<?> createEvent(EventRequestBean eventRequestBean) {
+    public EventResponseBean<?> getAllEvents(int page, int limit, String type) {
+        String cacheKey = RedisEnums.GET_ALL_EVENTS.name();
+        this.redisService.deleteValue(cacheKey);
+        List<EventEntity> cachedEvents = redisService.getValue(cacheKey, new TypeReference<>() {});
 
-        this.redisService.deleteValue(RedisEnums.GET_ALL_EVENTS.name());
+        if (cachedEvents != null) {
+            return EventResponseBean.builder().status(true).data(cachedEvents).build();
+        }
 
-        EventEntity eventEntity=this.eventRepository.save(
-                EventEntity.builder()
-                        .eventName(eventRequestBean.getEventName())
-                        .eventDateTime(eventRequestBean.getEventDateTime())
-                        .eventLocation(eventRequestBean.getEventLocation())
-                        .userEntity(UserEntity.builder().userID(this.userService.getUserData()).build())
-                        .postedAt(LocalDateTime.now())
-                        .build()
-        );
+        Page<EventEntity> eventsPage = eventRepository.findAll(PageRequest.of(page, limit));
+        List<EventDataBean> eventData = Mapper.mappedAllEventsDataIntoBean(eventsPage.getContent(), type);
 
-        EventDataBean eventDataBean =new EventDataBean();
+        redisService.setValue(cacheKey, eventData, 600);
 
-        BeanUtils.copyProperties(eventEntity, eventDataBean);
+        return EventResponseBean.builder().status(true).data(eventData).build();
+    }
 
-        eventDataBean.setCreatedBy(UserDataBean.builder().username(SecurityContextHolder.getContext().getAuthentication().getName()).build());
+    @Override
+    public EventResponseBean<?> createEvent(EventRequestBean request) {
+        String username = getLoggedInUsername();
+        String cacheKey = RedisEnums.GET_ALL_EVENTS_OF_PARTICULAR_USERS.name() + "_" + username;
+
+        redisService.deleteValue(RedisEnums.GET_ALL_EVENTS.name());
+        redisService.deleteValue(cacheKey);
+
+        EventEntity event = EventEntity.builder()
+                .eventName(request.getEventName())
+                .eventDateTime(request.getEventDateTime())
+                .eventLocation(request.getEventLocation())
+                .userEntity(UserEntity.builder().userID(getCurrentUserId()).build())
+                .postedAt(LocalDateTime.now())
+                .build();
+
+        event = eventRepository.save(event);
+
+        EventDataBean dataBean = new EventDataBean();
+        BeanUtils.copyProperties(event, dataBean);
+        dataBean.setCreatedBy(UserDataBean.builder().username(getLoggedInUsername()).build());
 
         return EventResponseBean.builder()
                 .status(true)
                 .message(EventMessages.EVENT_CREATE_SUCCESS)
-                .data(eventDataBean)
+                .data(dataBean)
                 .build();
     }
 
     @Override
-    public EventResponseBean<?> updateEvent(EventRequestBean eventRequestBean, Long id) throws EventNotFoundException {
+    public EventResponseBean<?> updateEvent(EventRequestBean request, Long id) throws EventNotFoundException {
+        String username = getLoggedInUsername();
+        String cacheKey = RedisEnums.GET_ALL_EVENTS_OF_PARTICULAR_USERS.name() + "_" + username;
 
-//        this.redisService.deleteValue(RedisEnums.GET_ALL_EVENTS.name());
+        redisService.deleteValue(RedisEnums.GET_ALL_EVENTS.name());
+        redisService.deleteValue(cacheKey);
 
-        EventEntity eventEntity = eventRepository.findById(id)
+        EventEntity event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(String.format(EventMessages.EVENT_NOT_FOUND, id)));
 
-        BeanUtils.copyProperties(eventRequestBean,eventEntity);
-        eventEntity.setEventId(id);
+        BeanUtils.copyProperties(request, event);
+        event.setEventId(id);
+        event = eventRepository.save(event);
 
-        eventEntity = this.eventRepository.save(eventEntity);
-
-        EventDataBean eventDataBean =new EventDataBean();
-
-        BeanUtils.copyProperties(eventEntity, eventDataBean);
+        EventDataBean dataBean = new EventDataBean();
+        BeanUtils.copyProperties(event, dataBean);
 
         return EventResponseBean.builder()
                 .status(true)
                 .message(EventMessages.EVENT_UPDATE_SUCCESS)
-                .data(eventDataBean)
+                .data(dataBean)
                 .build();
     }
 
     @Override
     public EventResponseBean<?> deleteEvent(Long id) throws EventNotFoundException {
+        String username = getLoggedInUsername();
+        String cacheKey = RedisEnums.GET_ALL_EVENTS_OF_PARTICULAR_USERS.name() + "_" + username;
 
-//        this.redisService.deleteValue(RedisEnums.GET_ALL_EVENTS.name());
+        redisService.deleteValue(RedisEnums.GET_ALL_EVENTS.name());
+        redisService.deleteValue(cacheKey);
 
-        if(!this.eventRepository.existsById(id)){
+        if (!eventRepository.existsById(id)) {
             throw new EventNotFoundException(String.format(EventMessages.EVENT_NOT_FOUND, id));
         }
-        this.eventRepository.deleteById(id);
+
+        eventRepository.deleteById(id);
 
         return EventResponseBean.builder()
                 .status(true)
@@ -134,7 +136,27 @@ public class EventManagementServiceImpl implements EventManagementService {
                 .build();
     }
 
+    @Override
+    public EventResponseBean<?> getAllEventsOfParticularUser() {
+        String username = getLoggedInUsername();
+        String cacheKey = RedisEnums.GET_ALL_EVENTS_OF_PARTICULAR_USERS.name() + "_" + username;
 
+        EventResponseBean<?> cachedResponse = redisService.getValue(cacheKey, new TypeReference<>() {});
+        if (cachedResponse != null) {
+            return cachedResponse;
+        }
 
+        List<EventEntity> userEvents = eventRepository.findByUserEntityUserID(getCurrentUserId());
+        List<EventDataBean> eventData = Mapper.mappedAllEventsDataIntoBean(userEvents, "USER");
 
+        EventResponseBean<?> response = EventResponseBean.builder()
+                .status(true)
+                .message("GET ALL EVENTS")
+                .data(eventData)
+                .build();
+
+        redisService.setValue(cacheKey, response, 600);
+
+        return response;
+    }
 }

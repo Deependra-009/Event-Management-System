@@ -38,13 +38,13 @@ public class SecurityConfig{
                 .authorizeHttpRequests(auth->auth
                         .requestMatchers(URLConstant.SWAGGER_WHITELIST).permitAll()
                         .requestMatchers(URLConstant.PUBLIC_URLS).permitAll()
+                        .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
                                 .accessDeniedHandler(customAccessDeniedHandler)
                                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-
                 )
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
