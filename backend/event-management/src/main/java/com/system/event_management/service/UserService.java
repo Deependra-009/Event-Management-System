@@ -1,5 +1,6 @@
 package com.system.event_management.service;
 
+import com.system.event_management.entity.UserEntity;
 import com.system.event_management.exception.UserException;
 import com.system.event_management.model.userbeans.login.LoginRequestBean;
 import com.system.event_management.model.userbeans.login.LoginResponseBean;
@@ -16,5 +17,7 @@ public interface UserService {
     public LoginResponseBean<?> loginUser(LoginRequestBean loginRequestBean) throws UserException;
 
     public List<UserDataBean> getAllUser();
+
+    public Long getUserData();
 
 }

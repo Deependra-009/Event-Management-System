@@ -1,6 +1,6 @@
 package com.system.event_management.jwt;
 
-import com.system.event_management.core.UserConstants;
+import com.system.event_management.core.messages.UserMessages;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,7 +24,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("error", "Forbidden");
-        errorDetails.put("message", UserConstants.UNAUTHORIZED_ACCESS);
+        errorDetails.put("message", UserMessages.UNAUTHORIZED_ACCESS);
         errorDetails.put("path", request.getRequestURI());
 
         // Convert Map to JSON

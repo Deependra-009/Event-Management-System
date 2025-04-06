@@ -1,13 +1,13 @@
-package com.system.event_management.core;
+package com.system.event_management.core.messages;
 
-public class UserConstants {
+public class UserMessages {
 
     // Success Messages
     public static final String USER_REGISTER_SUCCESS = "User registered successfully";
     public static final String LOGIN_SUCCESS = "Login successful";
 
     // Error Messages
-    public static final String USER_NOT_FOUND = "User with ID %s not found";
+    public static final String USER_NOT_FOUND = "User with username %s not found";
     public static final String USER_ALREADY_EXISTS = "User with username %s already exists";
 
     // Token & Authentication

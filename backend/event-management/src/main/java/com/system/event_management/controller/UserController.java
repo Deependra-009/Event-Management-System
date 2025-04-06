@@ -44,4 +44,6 @@ public class UserController {
     public ResponseEntity<LoginResponseBean<?>> login(@RequestBody LoginRequestBean loginRequestBean) throws UserException {
         return new ResponseEntity<>(this.userService.loginUser(loginRequestBean), HttpStatus.CREATED);
     }
+
+
 }

@@ -1,6 +1,6 @@
 package com.system.event_management.controller;
 
-import com.system.event_management.core.EventConstants;
+import com.system.event_management.core.messages.EventMessages;
 import com.system.event_management.exception.EventNotFoundException;
 import com.system.event_management.exception.InvalidEventIDException;
 import com.system.event_management.exception.UserException;
@@ -32,20 +32,6 @@ public class EventController {
     @Autowired
     private RSVPService rsvpService;
 
-    @GetMapping
-    @Operation(summary = "Retrieve all events", description = "Fetches a paginated list of all events.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved the events"),
-            @ApiResponse(responseCode = "400", description = "Invalid request parameters"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<EventResponseBean<?>> getAllEvents(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int limit
-    ) {
-        return new ResponseEntity<>(eventManagementService.getAllEvents(page, limit), HttpStatus.OK);
-    }
-
     @PostMapping
     @Operation(summary = "Create a new event", description = "Creates a new event with the given details.")
     @ApiResponses(value = {
@@ -70,7 +56,7 @@ public class EventController {
         try {
             return new ResponseEntity<>(eventManagementService.updateEvent(eventRequestBean, Long.parseLong(id)), HttpStatus.OK);
         } catch (NumberFormatException e) {
-            throw new InvalidEventIDException(EventConstants.EVENT_ID_INVALID);
+            throw new InvalidEventIDException(EventMessages.EVENT_ID_INVALID);
         }
     }
 
@@ -86,7 +72,7 @@ public class EventController {
         try {
             return new ResponseEntity<>(eventManagementService.deleteEvent(Long.parseLong(id)), HttpStatus.OK);
         } catch (NumberFormatException e) {
-            throw new InvalidEventIDException(EventConstants.EVENT_ID_INVALID);
+            throw new InvalidEventIDException(EventMessages.EVENT_ID_INVALID);
         }
     }
 
@@ -102,5 +88,20 @@ public class EventController {
             @RequestBody RSVPRequestBean rsvpRequestBean
     ) throws EventNotFoundException, UserException {
         return new ResponseEntity<>(rsvpService.registerRSVP(eventId, rsvpRequestBean), HttpStatus.OK);
+    }
+
+    @PutMapping("/{eventId}/rsvp")
+    public ResponseEntity<RSVPResponseBean<?>> updateRSVPEvent(
+            @PathVariable Long eventId,
+            @RequestBody RSVPRequestBean rsvpRequestBean
+    ) throws EventNotFoundException, UserException {
+        return new ResponseEntity<>(rsvpService.updateRSVP(eventId, rsvpRequestBean), HttpStatus.OK);
+    }
+
+
+
+    @GetMapping("/get-all-events-of-particular-user")
+    public ResponseEntity<EventResponseBean<?>> getAllEventsOfParticularUser(){
+        return new ResponseEntity<>(eventManagementService.getAllEventsOfParticularUser(), HttpStatus.OK);
     }
 }
