@@ -9,7 +9,8 @@ import lombok.Setter;
 public enum RedisEnums {
 
     GET_ALL_EVENTS("GET_ALL_EVENTS"),
-    GET_ALL_USERS("GET_ALL_USERS");
+    GET_ALL_USERS("GET_ALL_USERS"),
+    GET_PARTICULAR_USER("GET_PARTICULAR_USER");
 
     private final String key;
 

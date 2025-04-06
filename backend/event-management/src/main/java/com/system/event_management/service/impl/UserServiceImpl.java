@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -60,6 +61,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseBean<?> createUser(UserRequestBean userRequestBean) throws UserException {
+
+//        this.redisService.deleteValue(RedisEnums.GET_ALL_USERS.name());
 
         userRequestBean.setPassword(passwordEncoder.encode(userRequestBean.getPassword()));
 
@@ -137,9 +140,22 @@ public class UserServiceImpl implements UserService {
             List<UserEntity> userEntityList = this.userRepository.fetchUserWithRolesAndRsvps();
 
             List<UserDataBean> userDataBeans = Mapper.mappedAllUsersDataIntoBean(userEntityList);
-            this.redisService.setValue(RedisEnums.GET_ALL_USERS.name(), userDataBeans,600);
+//            this.redisService.setValue(RedisEnums.GET_ALL_USERS.name(), userDataBeans,600);
             return userDataBeans;
         }
+    }
+
+    @Override
+    public Long getUserData(){
+        String username=SecurityContextHolder.getContext().getAuthentication().getName();
+        Long userID=this.redisService.getValue(RedisEnums.GET_PARTICULAR_USER.name()+"_"+username, new TypeReference<Long>(){});
+        if(userID!=null) return userID;
+        else{
+            userID=this.userRepository.fetchUserIdByUsername(username);
+            this.redisService.setValue(RedisEnums.GET_PARTICULAR_USER.name()+"_"+username,userID,600);
+            return userID;
+        }
+
     }
 
 

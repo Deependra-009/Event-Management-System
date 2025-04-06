@@ -3,22 +3,29 @@ package com.system.event_management.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.system.event_management.core.messages.EventMessages;
 import com.system.event_management.entity.EventEntity;
+import com.system.event_management.entity.UserEntity;
 import com.system.event_management.enums.RedisEnums;
 import com.system.event_management.exception.EventNotFoundException;
 import com.system.event_management.model.eventbeans.EventRequestBean;
 import com.system.event_management.model.eventbeans.EventDataBean;
 import com.system.event_management.model.eventbeans.EventResponseBean;
+import com.system.event_management.model.userbeans.user.UserDataBean;
 import com.system.event_management.repository.EventRepository;
+import com.system.event_management.repository.UserRepository;
 import com.system.event_management.service.EventManagementService;
+import com.system.event_management.service.UserService;
 import com.system.event_management.utils.Mapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -27,6 +34,9 @@ public class EventManagementServiceImpl implements EventManagementService {
 
     @Autowired
     private RedisService redisService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private EventRepository eventRepository;
@@ -40,20 +50,19 @@ public class EventManagementServiceImpl implements EventManagementService {
         if(cacheData!=null){
             return EventResponseBean.builder()
                     .status(true)
-                    .data(Mapper.mappedAllEventsDataIntoBean(cacheData))
+                    .data(cacheData)
                     .build();
         }
         else{
             Page<EventEntity> eventPage = eventRepository.findAll(PageRequest.of(page, limit));
 
-            this.redisService.setValue(RedisEnums.GET_ALL_EVENTS.name(),eventPage.getContent(),600);
-
-            return EventResponseBean.builder()
+            EventResponseBean<?> eventResponseBean=EventResponseBean.builder()
                     .status(true)
                     .data(Mapper.mappedAllEventsDataIntoBean(eventPage.getContent()))
                     .build();
 
-
+//            this.redisService.setValue(RedisEnums.GET_ALL_EVENTS.name(),eventResponseBean.getData(),600);
+            return eventResponseBean;
         }
     }
 
@@ -65,8 +74,10 @@ public class EventManagementServiceImpl implements EventManagementService {
         EventEntity eventEntity=this.eventRepository.save(
                 EventEntity.builder()
                         .eventName(eventRequestBean.getEventName())
-                        .eventDateTime(Timestamp.valueOf(eventRequestBean.getEventDateTime()))
+                        .eventDateTime(eventRequestBean.getEventDateTime())
                         .eventLocation(eventRequestBean.getEventLocation())
+                        .userEntity(UserEntity.builder().userID(this.userService.getUserData()).build())
+                        .postedAt(LocalDateTime.now())
                         .build()
         );
 
@@ -74,7 +85,7 @@ public class EventManagementServiceImpl implements EventManagementService {
 
         BeanUtils.copyProperties(eventEntity, eventDataBean);
 
-        eventDataBean.setEventDateTime(eventEntity.getEventDateTime().toLocalDateTime());
+        eventDataBean.setCreatedBy(UserDataBean.builder().username(SecurityContextHolder.getContext().getAuthentication().getName()).build());
 
         return EventResponseBean.builder()
                 .status(true)
@@ -86,7 +97,7 @@ public class EventManagementServiceImpl implements EventManagementService {
     @Override
     public EventResponseBean<?> updateEvent(EventRequestBean eventRequestBean, Long id) throws EventNotFoundException {
 
-        this.redisService.deleteValue(RedisEnums.GET_ALL_EVENTS.name());
+//        this.redisService.deleteValue(RedisEnums.GET_ALL_EVENTS.name());
 
         EventEntity eventEntity = eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(String.format(EventMessages.EVENT_NOT_FOUND, id)));
@@ -110,7 +121,7 @@ public class EventManagementServiceImpl implements EventManagementService {
     @Override
     public EventResponseBean<?> deleteEvent(Long id) throws EventNotFoundException {
 
-        this.redisService.deleteValue(RedisEnums.GET_ALL_EVENTS.name());
+//        this.redisService.deleteValue(RedisEnums.GET_ALL_EVENTS.name());
 
         if(!this.eventRepository.existsById(id)){
             throw new EventNotFoundException(String.format(EventMessages.EVENT_NOT_FOUND, id));

@@ -23,6 +23,11 @@ public interface UserRepository extends JpaRepository<UserEntity,Long> {
             @Param("username") String username
     );
 
+    @Query(UserSqlQuery.GET_USER_ID_BY_USERNAME)
+    public Long fetchUserIdByUsername(
+            @Param("username") String username
+    );
+
     @Query(UserSqlQuery.FIND_ALL_USERS_DATA)
     public List<UserEntity> fetchUserWithRolesAndRsvps();
 

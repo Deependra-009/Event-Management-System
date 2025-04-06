@@ -30,7 +30,14 @@ public class EventEntity {
     private String eventLocation;
 
     @NotNull(message = "Date and time are required")
-    private Timestamp eventDateTime;
+    private LocalDateTime eventDateTime;
+
+    @NotNull(message = "Date and time are required")
+    private LocalDateTime postedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity userEntity;
 
     @OneToMany(mappedBy = "eventEntity",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 //    @JsonIgnore

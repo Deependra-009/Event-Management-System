@@ -1,6 +1,7 @@
 package com.system.event_management.utils;
 
 import com.system.event_management.entity.EventEntity;
+import com.system.event_management.entity.RolesEntity;
 import com.system.event_management.entity.UserEntity;
 import com.system.event_management.model.eventbeans.EventDataBean;
 import com.system.event_management.model.rsvpbeans.RSVPData;
@@ -11,64 +12,51 @@ import org.springframework.data.domain.Page;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Mapper {
 
-    public static List<EventDataBean> mappedAllEventsDataIntoBean(List<EventEntity> eventEntityList){
+    public static List<EventDataBean> mappedAllEventsDataIntoBean(List<EventEntity> eventEntityList) {
+        return eventEntityList.stream()
+                .map(event -> {
+                    EventDataBean eventDataBean = new EventDataBean();
+                    BeanUtils.copyProperties(event, eventDataBean);
 
-        List<EventDataBean> eventDataBeanList=new ArrayList<>();
+                    eventDataBean.setCreatedBy(
+                            UserDataBean.builder()
+                                    .username(event.getUserEntity().getUsername())
+                                    .build()
+                    );
 
-        eventEntityList.forEach((event)->{
+                    List<RSVPData> usersList = event.getRsvps().stream()
+                            .map(user -> RSVPData.builder()
+                                    .userID(user.getUserEntity().getUserID())
+                                    .attending(user.isAttending())
+                                    .build())
+                            .collect(Collectors.toList());
 
-            EventDataBean eventDataBean=EventDataBean
-                    .builder()
-                    .eventId(event.getEventId())
-                    .eventName(event.getEventName())
-                    .eventDateTime(event.getEventDateTime().toLocalDateTime())
-                    .eventLocation(event.getEventLocation())
-                    .build();
+                    eventDataBean.setUsers(usersList);
 
-            List<RSVPData> usersList=new ArrayList<>();
-
-            event.getRsvps().forEach((user)->{
-                RSVPData rsvpData=RSVPData
-                        .builder()
-                        .userID(user.getUserEntity().getUserID())
-                        .attending(user.isAttending())
-                        .build();
-                usersList.add(rsvpData);
-            });
-
-            eventDataBean.setUsers(usersList);
-
-            eventDataBeanList.add(eventDataBean);
-        });
-
-        return eventDataBeanList;
-
-
+                    return eventDataBean;
+                })
+                .collect(Collectors.toList());
     }
 
-    public static List<UserDataBean> mappedAllUsersDataIntoBean(List<UserEntity> userEntityList){
-        List<UserDataBean> userResponseBeanList=new ArrayList<>();
 
-        userEntityList.forEach((user)->{
+    public static List<UserDataBean> mappedAllUsersDataIntoBean(List<UserEntity> userEntityList) {
+        return userEntityList.stream()
+                .map(user -> {
+                    UserDataBean userDataBean = new UserDataBean();
+                    BeanUtils.copyProperties(user, userDataBean);
+                    userDataBean.setRoles(mappedRolesIntoResponseBean(user));
+                    return userDataBean;
+                })
+                .collect(Collectors.toList());
+    }
 
-            List<String> roles=new ArrayList<>();
 
-            UserDataBean userDataBean=new UserDataBean();
-
-            BeanUtils.copyProperties(user,userDataBean);
-
-            user.getRoles().forEach((role)->roles.add(role.getRole()));
-
-            userDataBean.setRoles(roles);
-
-            userResponseBeanList.add(userDataBean);
-
-        });
-
-        return userResponseBeanList;
+    private static List<String> mappedRolesIntoResponseBean(UserEntity user){
+        return user.getRoles().stream().map(RolesEntity::getRole).toList();
     }
 
 }

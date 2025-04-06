@@ -26,7 +26,7 @@ public class RedisService {
             String json = objectMapper.writeValueAsString(value);
             redisTemplate.opsForValue().set(key, json, timeoutInSeconds, TimeUnit.SECONDS);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error serializing object", e);
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 

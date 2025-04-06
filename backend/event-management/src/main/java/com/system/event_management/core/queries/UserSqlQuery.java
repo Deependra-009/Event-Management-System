@@ -8,4 +8,5 @@ public class UserSqlQuery {
 
     public static final String FIND_ALL_USERS_DATA="SELECT u FROM UserEntity u LEFT JOIN FETCH u.roles r LEFT JOIN FETCH u.rsvps rv";
 
+    public static final String GET_USER_ID_BY_USERNAME="SELECT u.userID FROM UserEntity u WHERE u.username = :username";
 }

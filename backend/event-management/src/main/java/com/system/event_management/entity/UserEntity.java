@@ -32,4 +32,7 @@ public class UserEntity{
     @OneToMany(mappedBy = "userEntity",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<RSVPEntity> rsvps;
 
+    @OneToMany(mappedBy = "userEntity",fetch= FetchType.LAZY,cascade =CascadeType.ALL)
+    private Set<EventEntity> eventEntities;
+
 }
